@@ -1,0 +1,4 @@
+../Core/Src/serial.c:15:6:serial_init	8	static
+../Core/Src/serial.c:24:6:serial_send_str	16	static
+../Core/Src/serial.c:28:6:HAL_UART_TxCpltCallback	24	static
+../Core/Src/serial.c:36:6:HAL_UART_RxCpltCallback	16	static
