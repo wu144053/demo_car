@@ -54,8 +54,8 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, infrared1_led_Pin|infrared1_do_Pin|Car_PWM_Pin|monter_right_1_Pin
-                          |monter_right_2_Pin|GPIO_PIN_5|monter_left_2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, infrared1_led_Pin|infrared1_do_Pin|monter_right_1_Pin|monter_right_2_Pin
+                          |GPIO_PIN_5|monter_left_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, key_Pin|keyB10_Pin|keyB11_Pin|ultrasonic_tx_Pin
@@ -68,10 +68,10 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : infrared1_led_Pin infrared1_do_Pin Car_PWM_Pin monter_right_1_Pin
-                           monter_right_2_Pin PA5 monter_left_2_Pin */
-  GPIO_InitStruct.Pin = infrared1_led_Pin|infrared1_do_Pin|Car_PWM_Pin|monter_right_1_Pin
-                          |monter_right_2_Pin|GPIO_PIN_5|monter_left_2_Pin;
+  /*Configure GPIO pins : infrared1_led_Pin infrared1_do_Pin monter_right_1_Pin monter_right_2_Pin
+                           PA5 monter_left_2_Pin */
+  GPIO_InitStruct.Pin = infrared1_led_Pin|infrared1_do_Pin|monter_right_1_Pin|monter_right_2_Pin
+                          |GPIO_PIN_5|monter_left_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

@@ -97,8 +97,10 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
   HAL_TIM_Base_Start_IT(&htim2);
   Servo_PWM_Set(70);
+  car_speed_set(500);
   
   //Servo_PWM_Set(50);
   /* USER CODE END 2 */
@@ -181,10 +183,11 @@ void SystemClock_Config(void)
 // }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-  
   if(htim==&htim2){
+    
   }
 }
+
 
 /* USER CODE END 4 */
 

@@ -63,8 +63,6 @@ void Error_Handler(void);
 #define infrared1_led_GPIO_Port GPIOA
 #define infrared1_do_Pin GPIO_PIN_1
 #define infrared1_do_GPIO_Port GPIOA
-#define Car_PWM_Pin GPIO_PIN_2
-#define Car_PWM_GPIO_Port GPIOA
 #define monter_right_1_Pin GPIO_PIN_3
 #define monter_right_1_GPIO_Port GPIOA
 #define monter_right_2_Pin GPIO_PIN_4
