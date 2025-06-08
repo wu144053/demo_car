@@ -267,6 +267,7 @@ void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
   //检查是否是串口空闲中断（用于不定长接收）
+  //while(1);
   if(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE)){
     __HAL_UART_CLEAR_FLAG(&huart1,UART_FLAG_IDLE);
     HAL_UART_IDLE_IRQHandler(&huart1); //串口处理函数

@@ -25,5 +25,6 @@ extern uint8_t tx_buf[];
 /*Exported functions prototypes-----------------------------------------------*/
 void HAL_UART_IDLE_IRQHandler(UART_HandleTypeDef *huart);
 void bsp_blue_recive_packet(uint8_t * rx_buf , uint8_t len);
+void bsp_bluetooth_commond();
         
 #endif // !_BSP_UART_H_

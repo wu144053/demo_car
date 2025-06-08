@@ -100,28 +100,16 @@ int main(void)
   HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
   HAL_TIM_Base_Start_IT(&htim2);
   Servo_PWM_Set(70);
-  car_speed_set(500);
+  car_speed_set(700);
+  car_stright();
   
   //Servo_PWM_Set(50);
   /* USER CODE END 2 */
-  bsp_init();
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    //HAL_UART_Transmit_DMA(&huart1, tx_buf, 1);  
-//		if(flag == 1){
-//			for(uint8_t i = 0 ; i < length ;i ++ ){
-//				tx_buf[i] = rx_buf[length - i -1];
-//			} 
-//			HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET);
-//			tx_buf[length] = '\0';
-//			serial_send_str(tx_buf);
-//			HAL_UARTEx_ReceiveToIdle_IT(&huart1,rx_buf,UART_RX_BUF_SIZE );
-//			flag = 0 ;
-//		}
-		//serial_send_str(tx_data);
-    //serial_send_num(tx_data,3);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -168,7 +156,7 @@ void SystemClock_Config(void)
   }
 }
 
-// /* USER CODE BEGIN 4 */
+/* USER CODE BEGIN 4 */
 // void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 //     //if(huart->Instance == USART1){
 //       memcpy(tx_buf,rx_buf,1);
