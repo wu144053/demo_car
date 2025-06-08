@@ -7,4 +7,5 @@ void car_left();
 void car_right();
 void car_back();
 void car_stright();
+void car_still();
 #endif // !_BSP_MONTER_H_

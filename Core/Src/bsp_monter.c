@@ -77,5 +77,10 @@ void car_back(){
  */
 void car_stright(){
     left_wheel(MOVE_FORWARD);
-    left_wheel(MOVE_FORWARD);
+    right_wheel(MOVE_FORWARD);
+}
+
+void car_still(){
+    left_wheel(STILL);
+    right_wheel(STILL);
 }

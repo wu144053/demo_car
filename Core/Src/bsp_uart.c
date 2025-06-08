@@ -64,6 +64,8 @@ void bsp_bluetooth_commond(){
         car_left();
      }else if(rx_buf[0] == 0x44){
         car_back();
+     }else if(rx_buf[0] == 0x55){
+        car_still();
      }
 }
 
