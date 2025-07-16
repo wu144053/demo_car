@@ -1,0 +1,11 @@
+CompileFlags:
+    Add:
+        - -IE:\BaiduNetdiskDownload\arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi\arm-none-eabi\include\newlib-nano
+        - -IE:\BaiduNetdiskDownload\arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi\arm-none-eabi\include\c++\14.2.1
+        - -IE:\BaiduNetdiskDownload\arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi\arm-none-eabi\include\c++\14.2.1\arm-none-eabi\thumb\v7-m\nofp
+        - -IE:\BaiduNetdiskDownload\arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi\arm-none-eabi\include\c++\14.2.1\backward
+        - -IE:\BaiduNetdiskDownload\arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi\lib\gcc\arm-none-eabi\14.2.1\include
+        - -IE:\BaiduNetdiskDownload\arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi\lib\gcc\arm-none-eabi\14.2.1\include-fixed
+        - -IE:\BaiduNetdiskDownload\arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi\arm-none-eabi\include
+    CompilationDatabase: ./build/Debug
+    Compiler: E:\BaiduNetdiskDownload\arm-gnu-toolchain-14.2.rel1-mingw-w64-x86_64-arm-none-eabi\bin\arm-none-eabi-g++.exe

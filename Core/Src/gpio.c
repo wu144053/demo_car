@@ -54,12 +54,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, infrared1_led_Pin|infrared1_do_Pin|monter_right_1_Pin|monter_right_2_Pin
-                          |monter_left_1_Pin|monter_left_2_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, key_Pin|keyB10_Pin|keyB11_Pin|ultrasonic_tx_Pin
-                          |oled_scl_Pin|oled_sda_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, monter_right_1_Pin|monter_right_2_Pin|monter_left_1_Pin|monter_left_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
@@ -68,53 +63,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : infrared1_led_Pin infrared1_do_Pin monter_right_1_Pin monter_right_2_Pin
-                           monter_left_1_Pin monter_left_2_Pin */
-  GPIO_InitStruct.Pin = infrared1_led_Pin|infrared1_do_Pin|monter_right_1_Pin|monter_right_2_Pin
-                          |monter_left_1_Pin|monter_left_2_Pin;
+  /*Configure GPIO pins : monter_right_1_Pin monter_right_2_Pin monter_left_1_Pin monter_left_2_Pin */
+  GPIO_InitStruct.Pin = monter_right_1_Pin|monter_right_2_Pin|monter_left_1_Pin|monter_left_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : key_Pin keyB10_Pin keyB11_Pin ultrasonic_tx_Pin */
-  GPIO_InitStruct.Pin = key_Pin|keyB10_Pin|keyB11_Pin|ultrasonic_tx_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : infrared2_do_Pin */
-  GPIO_InitStruct.Pin = infrared2_do_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(infrared2_do_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PB15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PB6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : oled_scl_Pin */
-  GPIO_InitStruct.Pin = oled_scl_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(oled_scl_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : oled_sda_Pin */
-  GPIO_InitStruct.Pin = oled_sda_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(oled_sda_GPIO_Port, &GPIO_InitStruct);
 
 }
 

@@ -3,7 +3,6 @@
   "type": "ARM",
   "dependenceList": [],
   "srcDirs": [
-    "app",
     "Core",
     "Drivers"
   ],
@@ -41,7 +40,8 @@
           "RAM": [],
           "ROM": []
         },
-        "options": "null"
+        "options": "null",
+        "archExtensions": ""
       },
       "uploader": "STLink",
       "uploadConfig": {
@@ -75,7 +75,8 @@
           "Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
           "Drivers/STM32F1xx_HAL_Driver/Inc",
           "Drivers/CMSIS/Device/ST/STM32F1xx/Include",
-          "Drivers/CMSIS/Include"
+          "Drivers/CMSIS/Include",
+          "Core/Src"
         ],
         "libList": [],
         "defineList": [
@@ -116,5 +117,5 @@
       }
     }
   },
-  "version": "3.5"
+  "version": "3.6"
 }

@@ -18,7 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
 #include "dma.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -27,6 +29,7 @@
 /* USER CODE BEGIN Includes */
 #include "servo_pwm.h"
 #include "string.h"
+#include "bsp_enconder.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,8 +51,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+int16_t num_left = 0;
+int16_t num_right = 0;
+int16_t left_in;
+int16_t right_in;
 uint8_t tx_data[] = {0x03,0x02,0x01};
+uint16_t AD_Value;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -95,22 +102,50 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
+  MX_I2C1_Init();
+  MX_TIM4_Init();
+  MX_ADC1_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
   HAL_TIM_Base_Start_IT(&htim2);
+  HAL_TIM_Base_Start_IT(&htim4);
   bsp_init();
-  Servo_PWM_Set(70);
-  car_speed_set(700);
-  car_stright();
+  Enconder_init();
+  OLED_GPIO_Init();
+  OLED_Init();
+  OLED_ALL_Clear();
+  Speed_pid_init();
+  location_pid_init();
+  HAL_ADCEx_Calibration_Start(&hadc1);
+  car_set_right_pwm(100,TIM_CHANNEL_2);
   
-  //Servo_PWM_Set(50);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    // OLED_ShowNum(0,0,num,3,16,0);
+    // OLED_ShowNum(0,2,speed_pid.Output,5,16,0); //显示输出的占空比
+    // OLED_ShowNum(0,4,speed_pid.Target,5,16,0);
+    OLED_ShowNum(0,0,num_left,3,16,0);
+    OLED_ShowNum(64,0,speed_right_pid.Target,3,16,0);
+    OLED_ShowNum(0,2,location_pid.Output,5,16,0); //显示输出的占空比
+    OLED_ShowNum(64,2,right_in,5,16,0); //显示输出的占空比
+    OLED_ShowNum(0,4,location_pid.Target,5,16,0);
+    AD_Value = ADC_Read(hadc1);
+    //OLED_ShowNum(0,4,location_pid.Acture,5,16,0);
+    //OLED_ShowNum(0,6,location_pid.Target,5,16,0);
+    //OLED_ShowNum(64,6,location_pid.Output,5,16,0);
+    //speed_right_pid.Target = 0;//AD_Value/40;
+    location_pid.Target = AD_Value;
+    OLED_ShowNum(64,4,location_pid.Acture,5,16,0);
+    if(speed_left_pid.Output > 900){
+      speed_left_pid.Output = 900;
+    }
+    bsp_Serial_printf("%d,%d,%d,%d\r\n",speed_right_pid.Output,speed_right_pid.Acture,speed_right_pid.Target,speed_right_pid.Acture);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -126,6 +161,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -155,6 +191,12 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */
@@ -172,11 +214,39 @@ void SystemClock_Config(void)
 // }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+  static uint16_t count;
+  static uint16_t count_uart;
   if(htim==&htim2){
-    
+  }
+  if(htim==&htim4){
+    count_uart ++;
+    count ++;
+    if(count_uart >= 40){
+      count_uart = 0;
+      //bsp_Serial_printf("%d/r/n",speed_pid.Output);
+    }
+    if(count >= 40){
+      count = 0 ;
+      right_in += num_right;
+      left_in += num_left;
+      num_left = __HAL_TIM_GetCounter(&htim3); //左轮的编码器输出
+      num_right = __HAL_TIM_GetCounter(&htim1);//右轮的编码器输出
+      Speed_Pid(num_left,&speed_left_pid,TIM_CHANNEL_3,LEFT);//左轮PWM
+      Speed_Pid(num_right,&speed_right_pid,TIM_CHANNEL_2,RIGHT);//右轮PWM
+      //Speed_Pid(num)
+      if((location_pid.Acture >= location_pid.Target + 30)||(location_pid.Acture <= location_pid.Target - 30)){
+        location_pid_control(num_left,&location_pid);
+        speed_left_pid.Target = location_pid.Output;
+        speed_right_pid.Target = location_pid.Output;
+      }else {
+        speed_left_pid.Target = 0;
+        speed_right_pid.Target = 0;
+      }
+      __HAL_TIM_SetCounter(&htim1,0);
+      __HAL_TIM_SetCounter(&htim3,0);
+    }
   }
 }
-
 
 /* USER CODE END 4 */
 
@@ -191,7 +261,7 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
-    
+    bsp_blue_send_number(12);
   }
   /* USER CODE END Error_Handler_Debug */
 }
