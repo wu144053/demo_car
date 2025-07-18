@@ -25,6 +25,7 @@
 #include "usart.h"
 #include "gpio.h"
 
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "servo_pwm.h"
@@ -57,6 +58,9 @@ int16_t left_in;
 int16_t right_in;
 uint8_t tx_data[] = {0x03,0x02,0x01};
 uint16_t AD_Value;
+uint16_t oled_time;
+uint8_t oled_buf[100];
+uint8_t length;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -106,6 +110,7 @@ int main(void)
   MX_TIM4_Init();
   MX_ADC1_Init();
   MX_TIM1_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
@@ -119,22 +124,42 @@ int main(void)
   Speed_pid_init();
   location_pid_init();
   HAL_ADCEx_Calibration_Start(&hadc1);
-  car_set_right_pwm(100,TIM_CHANNEL_2);
-  
+  //car_set_right_pwm(100,TIM_CHANNEL_2);
+  send_control_data(0,0,1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    if (oled_time>= 40)
+    {
+      memcpy(oled_buf,commond_buffer,length);/* code */
+      OLED_ShowString(0,0,oled_buf,16,0);
+      oled_time = 0;
+    }
+    Trace_Data_analyse(commond_buffer);
+    for(uint8_t i = 0 ; i < 7 ; i ++){
+      OLED_ShowNum(8*i,4,trace_data[i],1,16,0);
+    }
+    //OLED_ShowNum(0,0,length,4,16,0);
+    //Commond_Write(rx_buf,recive_len);
+    // length = Commond_GetCommond_led();
+    // commond_buffer[length] = '\r';
+    // commond_buffer[length+1] = '\n';
+    // if(length != 0){
+    //   HAL_UART_Transmit_DMA(&huart3 , commond_buffer, length+2);//发送接收到的数据
+    // }
+    //send_control_data(0,0,1);
     // OLED_ShowNum(0,0,num,3,16,0);
     // OLED_ShowNum(0,2,speed_pid.Output,5,16,0); //显示输出的占空比
     // OLED_ShowNum(0,4,speed_pid.Target,5,16,0);
-    OLED_ShowNum(0,0,num_left,3,16,0);
-    OLED_ShowNum(64,0,speed_right_pid.Target,3,16,0);
-    OLED_ShowNum(0,2,location_pid.Output,5,16,0); //显示输出的占空比
-    OLED_ShowNum(64,2,right_in,5,16,0); //显示输出的占空比
-    OLED_ShowNum(0,4,location_pid.Target,5,16,0);
+    //OLED_ShowNum(0,0,num_left,3,16,0);
+    // OLED_ShowNum(64,0,speed_right_pid.Target,3,16,0);
+    // OLED_ShowNum(0,2,location_pid.Output,5,16,0); //显示输出的占空比
+    // OLED_ShowNum(64,2,right_in,5,16,0); //显示输出的占空比
+    // OLED_ShowNum(0,4,location_pid.Target,5,16,0);
+    //OLED_ShowString(0,0,rx_buf,16,0);
     AD_Value = ADC_Read(hadc1);
     //OLED_ShowNum(0,4,location_pid.Acture,5,16,0);
     //OLED_ShowNum(0,6,location_pid.Target,5,16,0);
@@ -145,7 +170,13 @@ int main(void)
     if(speed_left_pid.Output > 900){
       speed_left_pid.Output = 900;
     }
-    bsp_Serial_printf("%d,%d,%d,%d\r\n",speed_right_pid.Output,speed_right_pid.Acture,speed_right_pid.Target,speed_right_pid.Acture);
+    //send_control_data(0,0,1);
+    //bsp_uart3_send("wujingfei");
+    //bsp_blue_send("wujinghfe");
+    //send_control_data(0,0,1);
+    //HAL_UART_Transmit_DMA(&huart3 , "wu" , 5 );//发送接收到的数据
+    //bsp_uart3_send("wujingfe");
+    //bsp_Serial_printf("%d,%d,%d,%d\r\n",speed_right_pid.Output,speed_right_pid.Acture,speed_right_pid.Target,speed_right_pid.Acture);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -219,13 +250,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if(htim==&htim2){
   }
   if(htim==&htim4){
+    oled_time++ ;
     count_uart ++;
     count ++;
     if(count_uart >= 40){
       count_uart = 0;
       //bsp_Serial_printf("%d/r/n",speed_pid.Output);
     }
-    if(count >= 40){
+    if(count >= 40){ 
+      //OLED_ShowString(0,0,"wujingfei",16,0);
       count = 0 ;
       right_in += num_right;
       left_in += num_left;

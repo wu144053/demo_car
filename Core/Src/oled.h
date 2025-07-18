@@ -33,5 +33,6 @@ void OLED_Draw_16_8_ASCII(uint8_t,uint8_t,int);
 void OLED_Draw_16_16_Hz(uint8_t,uint8_t,int);
 void OLED_ShowChar(uint8_t x,uint8_t y,uint8_t chr,uint8_t Char_Size,uint8_t Color_Turn);
 void OLED_ShowNum(uint8_t x,uint8_t y , int32_t num,uint8_t len,uint8_t size2, uint8_t Color_Turn);
+void OLED_ShowString(uint8_t x , uint8_t y , uint8_t* string , uint8_t Char_Size ,uint8_t Color_turn);
 
 #endif

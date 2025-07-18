@@ -3,6 +3,7 @@
 #include "bsp_uart.h"
 #include "stdio.h"
 #include "stdarg.h"
+#include "commond.h"
 //#include "stdint.h"
 
 /* user code end include*/
@@ -13,10 +14,21 @@ uint8_t g_Dmode_Data = 0;
 
 /* user code begine PV*/
 uint8_t rx_buf[RX_BUF_SIZE];
+uint8_t rx_buf3[RX_BUF_SIZE];
 uint8_t tx_buf[TX_BUF_SIZE];
 uint8_t process_buf[RX_BUF_SIZE];  //将rx_buf接收到的字节拷贝到process_buf
-uint16_t recive_len;
-uint8_t send_buf[8];
+uint8_t packnew[RX_BUF_SIZE];
+uint8_t recive_len;
+uint16_t recive3_len;
+uint8_t* start_index;
+uint8_t stop_index;
+uint16_t data_length;//字符长度
+uint8_t merge_flag = 0;
+int8_t uart_tx_done = 1;
+int8_t uart_tx_done1 = 1;
+int8_t uart_tx_done2 = 1;
+uint8_t commend_buf[30];
+//uint8_t send_buf[8];
 /* user code begin include */
 
 #include "bsp_uart.h"
@@ -26,10 +38,7 @@ uint8_t send_buf[8];
 /* user code end include*/
 
 /* user code begine PV*/
-uint8_t rx_buf[RX_BUF_SIZE];
-uint8_t tx_buf[TX_BUF_SIZE];
-uint8_t process_buf[RX_BUF_SIZE];  //将rx_buf接收到的字节拷贝到process_buf
-uint16_t recive_len;
+
 /* user code end PV*/
 
 /* user code begin */
@@ -43,13 +52,33 @@ uint16_t recive_len;
 void HAL_UART_IDLE_IRQHandler(UART_HandleTypeDef *huart){
     if(huart->Instance == USART1){
         HAL_UART_DMAStop(&huart1);
-        bsp_bluetooth_commond();
         recive_len = RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart1.hdmarx);
+        length = Commond_GetCommond_led();
+        commond_buffer[length] = '\r';
+        commond_buffer[length+1] = '\n';
+        if(length != 0){
+            HAL_UART_Transmit_DMA(&huart3 , commond_buffer, length+2);//发送接收到的数据
+        }
+        //rx_buf[recive_len] = '\0';
+        //Commond_Write(rx_buf,recive_len);
+        //Commond_GetCommond_led();
+        //if(length != 0){
+         //   HAL_UART_Transmit_DMA(&huart3 , commond_buffer , length) ;//发送接收到的数据
+        //}
+        Commond_Write(rx_buf,recive_len);
         memcpy(process_buf,rx_buf,recive_len);
-        process_buf[recive_len] = '\0';
-        HAL_UART_Transmit_DMA(&huart1 , process_buf , recive_len );//发送接收到的数据
+        //process_buf[recive_len] = '\r';
+        //process_buf[recive_len + 1] = '\n';
+        //HAL_UART_Transmit_DMA(&huart3 , process_buf , recive_len );//发送接收到的数据
         //重新启动dma接收数据
         HAL_UART_Receive_DMA(&huart1 , rx_buf,RX_BUF_SIZE);
+    }
+    if(huart->Instance == USART3){
+        HAL_UART_DMAStop(&huart3);
+        recive3_len = RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart3.hdmarx);
+        rx_buf3[recive3_len] = '\0';
+        HAL_UART_Transmit_DMA(&huart3,rx_buf3,recive3_len);
+        HAL_UART_Receive_DMA(&huart3,rx_buf3,RX_BUF_SIZE);
     }
 }
 
@@ -74,9 +103,19 @@ void bsp_blue_send(uint8_t* tx_blue_buf){
     while (tx_blue_buf[i] != '\0')
     {
         i ++;
-        
     }
+    //while(HAL_UART_GetState(&huart1)!=HAL_UART_STATE_READY);
     HAL_UART_Transmit_DMA(&huart1 , tx_blue_buf ,i /*strlen((const char *)tx_buf)+1*/);
+    //HAL_UART_Transmit(&huart1,tx_buf,i,100);
+}
+
+void bsp_uart3_send(uint8_t* tx_blue_buf){
+    uint16_t i = 0;
+    while (tx_blue_buf[i] != '\0')
+    {
+        i++;/* code */
+    }
+    HAL_UART_Transmit_DMA(&huart3,tx_blue_buf,i);
 }
 
 /**
@@ -93,7 +132,6 @@ void bsp_uart_string(char * string){
     HAL_UART_Transmit_DMA(&huart1 ,(uint8_t *)string,i);
 }
 
-int8_t uart_tx_done = 1;
 /**
  * @brief 将串口发送数据格式化
  * 
@@ -143,14 +181,29 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == USART1)
     {
+        //HAL_UART_Receive_DMA(&huart1,rx_buf,RX_BUF_SIZE);
         uart_tx_done = 1;
+        uart_tx_done1 = 1;
+        uart_tx_done2 = 1;
+        //HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,SET);
     }
 }
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+    if(huart->Instance==USART1){
+        //HAL_UART_DMAStop(&huart1);
+        //HAL_UART_Transmit_DMA(&huart1,"wujingfe",30);
+        //HAL_UART_Receive_DMA(&huart1,rx_buf,30);
+        
+    }
+}
+
+char send_buf[] = "$0,0,0#";
 
 void send_control_data(uint8_t adjust,uint8_t aData,uint8_t dData)
 {
-	uint8_t send_buf[8] = "$0,0,0#";
+    while(!uart_tx_done1);
+    uart_tx_done1 = 0;
 	if(adjust == 1)//校准命令
 	{
 		send_buf[1] = '1';
@@ -179,7 +232,8 @@ void send_control_data(uint8_t adjust,uint8_t aData,uint8_t dData)
 		send_buf[5] = '0';
 		g_Dmode_Data = 0;
 	}
-    bsp_blue_send(send_buf);
+    bsp_blue_send((uint8_t*)send_buf);
 }
+
 
 /* user code end */

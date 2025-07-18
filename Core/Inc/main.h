@@ -34,6 +34,9 @@ extern "C" {
 #include "bsp_include.h"
 #include "oled.h"
 #include "stdio.h"
+#include "commond.h"
+#include "trace.h"
+#include "bsp_uart.h"
 
 
 /* USER CODE END Includes */
@@ -83,6 +86,9 @@ void Error_Handler(void);
 #define Encon_left_2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
+
+extern uint16_t oled_time;
+extern uint8_t length;
 
 /* USER CODE END Private defines */
 

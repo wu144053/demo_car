@@ -8,11 +8,12 @@
 #include "stm32f1xx_it.h"
 #include "string.h"
 #include "stdio.h"
+#include "main.h"
 
 /* user code end include*/
 
 /* user code begin define */
-#define RX_BUF_SIZE 100
+#define RX_BUF_SIZE 120
 #define TX_BUF_SIZE 100
 /* user code end define */
 
@@ -20,6 +21,9 @@
 
 extern uint8_t rx_buf[];
 extern uint8_t tx_buf[];
+extern uint8_t rx_buf3[];
+extern uint8_t packnew[RX_BUF_SIZE];
+extern uint8_t recive_len;
 
 /* user code end PV*/
 
@@ -34,6 +38,8 @@ void bsp_Serial_printf(char* format,...);
 void bsp_uart_string(char * string);
 void bsp_blue_send(uint8_t* tx_blue_buf);
 void send_control_data(uint8_t adjust,uint8_t aData,uint8_t dData);
+void bsp_uart3_send(uint8_t* tx_blue_buf);
+
 
 #endif // !_BSP_UART_H_
 

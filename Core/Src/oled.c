@@ -216,6 +216,23 @@ void OLED_ShowChar(uint8_t x,uint8_t y,uint8_t chr,uint8_t Char_Size,uint8_t Col
 		  }
 }
 
+/**
+ * @brief oledÏÔÊ¾×Ö·û´®
+ * 
+ * @param x 
+ * @param y 
+ * @param string ×Ö·û´®
+ * @param Char_Size 
+ * @param Color_turn 
+ */
+void OLED_ShowString(uint8_t x , uint8_t y , uint8_t* string , uint8_t Char_Size ,uint8_t Color_turn){
+  uint8_t i = 0; 
+  while( string[i] != '\0'  ){
+    OLED_ShowChar(x+8*i ,y , string[i],16,0);
+    i++;
+  }
+}
+
 unsigned int oled_pow(uint8_t m,uint8_t n)
 {
 	unsigned int result=1;
@@ -307,6 +324,3 @@ void OLED_Draw_16_16_Hz(uint8_t line,uint8_t column,int Hz_num)
   }
 }
 
-void OLED_Draw_char(){
-
-}
