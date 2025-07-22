@@ -53,19 +53,19 @@ void HAL_UART_IDLE_IRQHandler(UART_HandleTypeDef *huart){
     if(huart->Instance == USART1){
         HAL_UART_DMAStop(&huart1);
         recive_len = RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart1.hdmarx);
-        length = Commond_GetCommond_led();
+        length = Commond_GetCommond_led();  
+        Commond_Write(rx_buf,recive_len);
         commond_buffer[length] = '\r';
         commond_buffer[length+1] = '\n';
         if(length != 0){
-            HAL_UART_Transmit_DMA(&huart3 , commond_buffer, length+2);//发送接收到的数据
+           //HAL_UART_Transmit_DMA(&huart3 , commond_buffer, length+2);//发送接收到的数据
         }
         //rx_buf[recive_len] = '\0';
-        //Commond_Write(rx_buf,recive_len);
         //Commond_GetCommond_led();
-        //if(length != 0){
-         //   HAL_UART_Transmit_DMA(&huart3 , commond_buffer , length) ;//发送接收到的数据
-        //}
-        Commond_Write(rx_buf,recive_len);
+        // if(length != 0){
+           // HAL_UART_Transmit_DMA(&huart3 , rx_buf ,recive_len) ;//发送接收到的数据
+        // }
+        //Commond_Write(rx_buf,recive_len);
         memcpy(process_buf,rx_buf,recive_len);
         //process_buf[recive_len] = '\r';
         //process_buf[recive_len + 1] = '\n';
@@ -129,7 +129,7 @@ void bsp_uart_string(char * string){
     {
         i++;
     }
-    HAL_UART_Transmit_DMA(&huart1 ,(uint8_t *)string,i);
+    HAL_UART_Transmit_DMA(&huart3 ,(uint8_t *)string,i);
 }
 
 /**
@@ -182,10 +182,14 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     if (huart->Instance == USART1)
     {
         //HAL_UART_Receive_DMA(&huart1,rx_buf,RX_BUF_SIZE);
-        uart_tx_done = 1;
+        //uart_tx_done = 1;
         uart_tx_done1 = 1;
         uart_tx_done2 = 1;
         //HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,SET);
+    }
+    if(huart->Instance == USART3)
+    {
+        uart_tx_done = 1;    
     }
 }
 

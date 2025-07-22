@@ -13,9 +13,9 @@
 Pid_InitTypedef speed_left_pid;
 Pid_InitTypedef location_pid;
 Pid_InitTypedef speed_right_pid = {
-    .ki     = 1.8,
-    .kp     = 4.9,
-    .Target = 40,
+    .ki     = 3,
+    .kp     = 30,
+    .Target = 60,
     .kd     = 0.6,
 };
 
@@ -162,11 +162,13 @@ void car_set_right_pwm(int16_t PWM,uint32_t CHANNEL){
  */
 void Speed_pid_init()
 {
-    speed_left_pid.ki     = 1.8;
-    speed_left_pid.kp     = 4.9;
+    speed_left_pid.ki     = 3;
+    speed_left_pid.kp     = 30;
     speed_left_pid.Target = 40;
     speed_left_pid.kd     = 0.6;
 }
+
+int16_t Error_left_int,Error_right_int;
 
 /**
  * @brief pid速度环控制
@@ -177,23 +179,46 @@ void Speed_Pid(int16_t speed,Pid_InitTypedef* car_pid,uint32_t channel,uint16_t 
 {
     static int16_t Error_left_0,Error_right_0;
     static int16_t Error_left_1,Error_right_1;
-    static int16_t Error_left_int,Error_right_int;
+    //static int16_t Error_left_int,Error_right_int;
+    static int16_t Error_right_filterling,Error_left_filterling;
     
     int16_t *pError0   = (wheels == 0)?&Error_left_0:&Error_right_0;
     int16_t *pError1   = (wheels == 0)?&Error_left_1:&Error_right_1;
     int16_t *pErrorint = (wheels == 0)?&Error_left_int:&Error_right_int;
+    int16_t *filterling = (wheels == 0)?&Error_left_filterling:&Error_right_filterling;
     // int16_t car_pwm = __HAL_TIM_GET_COMPARE(&htim2,TIM_CHANNEL_3);
     car_pid->Acture = speed;
     *pError1           = *pError0;
     *pError0           = car_pid->Target - car_pid->Acture;
-    *pErrorint += *pError0;
-    if (*pErrorint >= 500) {
-        *pErrorint = 500;
+    
+    /* 输入滤波 */
+    *filterling = (0.7)*(*pError0) + (0.3)*(*pError1);
+
+    /* 积分分离 */
+    // if(*pError0 > 3 || *pError0 < -3){
+        *pErrorint += *pError0;
+    // }else{
+    //     *pError0 *=0.9;
+    // }
+    
+    /*积分限幅*/
+    if (*pErrorint >= 400) {
+        *pErrorint = 400;
+    }else if(*pErrorint <= -500){
+        *pErrorint = -500;
     }
-    car_pid->Output = (int16_t)(car_pid->kp * *pError0 + car_pid->ki * *pErrorint + car_pid->kd * (*pError1 - *pError0));
+    car_pid->Output = (int16_t)(car_pid->kp * *pError0/*(*filterling)*/ + car_pid->ki * *pErrorint + car_pid->kd * (*pError0 - *pError1)) ;
+    // if(*pError0 > 10){
+    //    car_pid->Output = (int16_t)(car_pid->kp * *pError0/*(*filterling)*/ + car_pid->ki * *pErrorint + car_pid->kd * (*pError0 - *pError1)) + 200;
+    // }else if(*pError0 < -10){
+    //     car_pid->Output = (int16_t)(car_pid->kp * (*filterling) + car_pid->ki * *pErrorint + car_pid->kd * (*pError0 - *pError1)) - 200;
+    // }else {
+    //    car_pid->Output = (int16_t)(car_pid->kp * (*filterling) + car_pid->ki * *pErrorint + car_pid->kd * (*pError0 - *pError1)) ;
+    // }
     // if(car_pid.Output < 0){
     //      car_pid.Output = 0;
     //  }else
+    /*输出限幅 */
     if (car_pid->Output > 500) {
         car_pid->Output = 500;
     }
@@ -216,7 +241,7 @@ void location_pid_init()
     location_pid.ki     = 0.01;
     location_pid.kp     = 5;
     location_pid.kd     = 1;
-    location_pid.Target = 1000;
+    location_pid.Target = 500;
 }
 
 /**

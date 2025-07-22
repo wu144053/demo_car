@@ -17,6 +17,8 @@ typedef struct
 #define LEFT 0
 #define RIGHT 1
 
+extern int16_t Error_left_int,Error_right_int;
+
 extern Pid_InitTypedef speed_left_pid;
 extern Pid_InitTypedef location_pid;
 extern Pid_InitTypedef speed_right_pid;

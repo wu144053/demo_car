@@ -25,7 +25,6 @@
 #include "usart.h"
 #include "gpio.h"
 
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "servo_pwm.h"
@@ -124,24 +123,26 @@ int main(void)
   Speed_pid_init();
   location_pid_init();
   HAL_ADCEx_Calibration_Start(&hadc1);
-  //car_set_right_pwm(100,TIM_CHANNEL_2);
+  //car_set_right_pwm(800,TIM_CHANNEL_2);
   send_control_data(0,0,1);
+  //__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (oled_time>= 40)
-    {
+    if (oled_time>= 40){
       memcpy(oled_buf,commond_buffer,length);/* code */
-      OLED_ShowString(0,0,oled_buf,16,0);
+      //OLED_ShowString(1,0,oled_buf,16,0);
       oled_time = 0;
     }
     Trace_Data_analyse(commond_buffer);
-    for(uint8_t i = 0 ; i < 7 ; i ++){
+    for(uint8_t i = 0 ; i < 7 ; i ++){ 
       OLED_ShowNum(8*i,4,trace_data[i],1,16,0);
     }
+    speed_right_pid.Target= 0;
+    //OLED_ShowNum(0,4,speed_right_pid.Output,5,16,0);
     //OLED_ShowNum(0,0,length,4,16,0);
     //Commond_Write(rx_buf,recive_len);
     // length = Commond_GetCommond_led();
@@ -154,21 +155,23 @@ int main(void)
     // OLED_ShowNum(0,0,num,3,16,0);
     // OLED_ShowNum(0,2,speed_pid.Output,5,16,0); //显示输出的占空比
     // OLED_ShowNum(0,4,speed_pid.Target,5,16,0);
-    //OLED_ShowNum(0,0,num_left,3,16,0);
+    OLED_ShowNum(0,2,num_right,3,16,0);
     // OLED_ShowNum(64,0,speed_right_pid.Target,3,16,0);
     // OLED_ShowNum(0,2,location_pid.Output,5,16,0); //显示输出的占空比
     // OLED_ShowNum(64,2,right_in,5,16,0); //显示输出的占空比
     // OLED_ShowNum(0,4,location_pid.Target,5,16,0);
     //OLED_ShowString(0,0,rx_buf,16,0);
     AD_Value = ADC_Read(hadc1);
+    OLED_ShowNum(0,0,AD_Value,5,16,0);
     //OLED_ShowNum(0,4,location_pid.Acture,5,16,0);
     //OLED_ShowNum(0,6,location_pid.Target,5,16,0);
     //OLED_ShowNum(64,6,location_pid.Output,5,16,0);
-    //speed_right_pid.Target = 0;//AD_Value/40;
-    location_pid.Target = AD_Value;
-    OLED_ShowNum(64,4,location_pid.Acture,5,16,0);
-    if(speed_left_pid.Output > 900){
-      speed_left_pid.Output = 900;
+    speed_left_pid.Target = AD_Value/20 -  100;
+    //location_pid.Target = AD_Value;
+    //location_pid.Target = 500;
+    //OLED_ShowNum(64,4,location_pid.Acture,5,16,0);
+    if(speed_left_pid.Output > 500){
+      speed_left_pid.Output = 500;
     }
     //send_control_data(0,0,1);
     //bsp_uart3_send("wujingfei");
@@ -176,7 +179,7 @@ int main(void)
     //send_control_data(0,0,1);
     //HAL_UART_Transmit_DMA(&huart3 , "wu" , 5 );//发送接收到的数据
     //bsp_uart3_send("wujingfe");
-    //bsp_Serial_printf("%d,%d,%d,%d\r\n",speed_right_pid.Output,speed_right_pid.Acture,speed_right_pid.Target,speed_right_pid.Acture);
+    bsp_Serial_printf("%d,%d,%d,%d\r\n",speed_left_pid.Output,speed_left_pid.Acture,speed_left_pid.Target,Error_left_int);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -257,24 +260,39 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
       count_uart = 0;
       //bsp_Serial_printf("%d/r/n",speed_pid.Output);
     }
-    if(count >= 40){ 
-      //OLED_ShowString(0,0,"wujingfei",16,0);
+    if(count >= 35){ 
       count = 0 ;
+
+      /*走过的位置 */
       right_in += num_right;
       left_in += num_left;
+      
+      /* 获取速度 */
       num_left = __HAL_TIM_GetCounter(&htim3); //左轮的编码器输出
       num_right = __HAL_TIM_GetCounter(&htim1);//右轮的编码器输出
-      Speed_Pid(num_left,&speed_left_pid,TIM_CHANNEL_3,LEFT);//左轮PWM
-      Speed_Pid(num_right,&speed_right_pid,TIM_CHANNEL_2,RIGHT);//右轮PWM
-      //Speed_Pid(num)
-      if((location_pid.Acture >= location_pid.Target + 30)||(location_pid.Acture <= location_pid.Target - 30)){
-        location_pid_control(num_left,&location_pid);
-        speed_left_pid.Target = location_pid.Output;
-        speed_right_pid.Target = location_pid.Output;
+      
+      /* 左轮速度环控制 */
+      if(speed_left_pid.Target >= 5 || speed_left_pid.Target <= -5){
+        Speed_Pid(num_left,&speed_left_pid,TIM_CHANNEL_3,LEFT);//左轮PWM
       }else {
-        speed_left_pid.Target = 0;
-        speed_right_pid.Target = 0;
+        __HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_3,0);
       }
+      
+      /* 右轮速度环控制*/
+      if(speed_right_pid.Target >= 5 || speed_right_pid.Target <= -5){
+        Speed_Pid(num_right,&speed_right_pid,TIM_CHANNEL_2,RIGHT);//右轮PWM
+      }else {
+        __HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,0);
+      }
+      //Speed_Pid(num)
+      //if((location_pid.Acture >= location_pid.Target + 30)||(location_pid.Acture <= location_pid.Target - 30)){
+        //location_pid_control(num_left,&location_pid);
+        //speed_left_pid.Target = location_pid.Output;
+        //speed_right_pid.Target = location_pid.Output;///location_pid.Output;
+      //}else {
+        //speed_left_pid.Target = 0;
+        //speed_right_pid.Target = 0;
+      //}
       __HAL_TIM_SetCounter(&htim1,0);
       __HAL_TIM_SetCounter(&htim3,0);
     }
